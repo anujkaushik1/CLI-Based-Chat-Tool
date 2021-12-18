@@ -1,49 +1,48 @@
 import socket
 
-from _thread import *
-import threading
+from threading import Thread
 
-print_lock = threading.Lock()
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind(("localhost",5555))
 
-def threaded(c):
+server.listen(1000)
 
-  data = c.recv(1024)
+all_clients = {}
+chat_rooms = {}
 
-  if not data:
-    print("Bye")
+def client_thread(client):
+    while True:
+        try:
+         msg = client.recv(1024)
+         for c in all_clients:
+             c.send(msg)   
+        
+        except:
+            for c in all_clients:
+              if c != client:
+                c.send(f'{name} has left the chat'.encode())
+            del all_clients[client]
+            client.close()
+            break
 
-    print_lock.release()
 
-  data = data[::-1]
 
-  c.send(data)
 
-  c.close()
+while True:
+    print("Waiting for connection")
+    client, address = server.accept()
+    print("Connection established")
+    name = client.recv(1024).decode()
+   
+    print(name)
 
-def Main():
-  port = 12345
-
-  s = socket.socket()
-  s.bind(("", port))
-  print("Socket binded to port", port)
-
-  s.listen(5)
-
-  
-  print("Socket is listening")
-  
-  while True:
-
-    c, addr = s.accept()
-
-    print_lock.acquire()
-    print("Connected to :", addr[0], ":", addr[1])
-
-    start_new_thread(threaded, (c, ))
+    all_clients[client] = name
     
+    for c in all_clients:
+        if c != client:
+            c.send(f'{name} has joined the chat'.encode())
     
-  s.close()
+    thread = Thread(target = client_thread,args=(client, ))
+    thread.start()
 
-
-Main()
 

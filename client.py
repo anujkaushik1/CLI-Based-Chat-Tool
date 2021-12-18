@@ -1,37 +1,47 @@
-# Import socket module
+
 import socket
-  
-  
-def Main():
-    # local host IP '127.0.0.1'
-    host = '127.0.0.1'
-  
-    # Define the port on which you want to connect
-    port = 12345
-  
-    s = socket.socket()
-  
-    # connect to server on local computer
-    s.connect((host,port))
-  
-    # message you send to server
-    message = "My name is anuj kaushik"
+from threading import Thread
 
-  
-        # message sent to server
-    s.send(message.encode('ascii'))
-  
-        # messaga received from server
-    data = s.recv(1024)
-  
-        # print the received message
-        # here it would be a reverse of sent message
-    print('Received from the server :',str(data.decode('ascii')))
-  
-        # ask the client whether he wants to continue
-    
-    
-    s.close()
-  
+name = input("Enter your name: ")
 
-Main()
+print("Enter 1 to get all list of Rooms and 2 for creating new rooms")
+
+
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect(("localhost", 5555))
+
+client.send(name.encode())
+
+
+
+def receiveChatRoom(client):
+    pass
+
+def send(client):
+
+    while True:
+
+       data = f'{name}:{input("")}'
+       client.send(data.encode())
+
+    
+
+
+def receive(client):
+    while True:
+        try:
+            data = client.recv(1024).decode()
+            print(data)
+        except Exception as e:
+            print(str(e))
+            client.close()
+            break
+
+
+thread3 = Thread(target=receiveChatRoom, args=(client, ))
+thread3.start
+thread1 = Thread(target=send, args=(client, ))
+thread1.start()
+thread2 = Thread(target=receive, args=(client, ))
+thread2.start()
+
