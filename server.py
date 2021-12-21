@@ -20,7 +20,7 @@ def client_thread(client):
         except:
             for c in all_clients:
               if c != client:
-                c.send(f'{name} has left the chat'.encode())
+                c.send(f'{all_clients[client]} has left the chat'.encode())
             del all_clients[client]
             client.close()
             break
@@ -33,8 +33,6 @@ while True:
     client, address = server.accept()
     print("Connection established")
     name = client.recv(1024).decode()
-   
-    print(name)
 
     all_clients[client] = name
     
